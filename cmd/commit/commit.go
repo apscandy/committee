@@ -1,11 +1,14 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
 */
 package commit
 
 import (
 	"github.com/spf13/cobra"
+)
+
+var (
+	message string
 )
 
 // commitCmd represents the commit command
