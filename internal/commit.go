@@ -33,10 +33,7 @@ func (c *CommitObject) AddScope(scopeMessage string){
 	c.scopeMessage = scopeMessage
 }
 
-func Commit(c *CommitObject) {
-	/* Takes a commit message (like the one you pass to git) and a
-	conventional commit type. For example fix, feat or chore
-	*/
+func (c *CommitObject) ToSting() string{
 	var sb strings.Builder
 	sb.WriteString(c.commitType)
 	if c.hasScope {
@@ -49,8 +46,15 @@ func Commit(c *CommitObject) {
 	}
 	sb.WriteString(": ")
 	sb.WriteString(c.commitMessage)
+	return sb.String()
+}
 
-	execCmd := exec.Command("git", "commit", "-m", sb.String())
+func Commit(c *CommitObject) {
+	/* Takes a commit message (like the one you pass to git) and a
+	conventional commit type. For example fix, feat or chore
+	*/
+
+	execCmd := exec.Command("git", "commit", "-m", c.ToSting())
 	stdout, err := execCmd.Output()
 
 	if err != nil {

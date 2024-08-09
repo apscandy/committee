@@ -4,34 +4,66 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package commit
 
 import (
-	"github.com/spf13/cobra"
-)
+	"committee/internal"
+	"os"
 
-var (
-	message string
+	"github.com/pterm/pterm"
+	"github.com/spf13/cobra"
 )
 
 // commitCmd represents the commit command
 var CommitCmd = &cobra.Command{
 	Use:   "commit",
 	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long:  `awd`,
+	Run: func(cmd *cobra.Command, args []string) {
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-}
+		options := []string{"fix", "feat", "chore", "refactor", "ci", "build", "docs", "perf"}
+		commitType := pterm.DefaultInteractiveSelect.WithOptions(options)
+		commitType.DefaultText = "Commit type"
+		commitTypeSelected, _ := commitType.Show()
 
-func init() {
+		pterm.Println()
 
-	// Here you will define your flags and configuration settings.
+		pterm.DefaultBasicText.Println("Your commit message should complete the following sentence.")
+		commitMessage := pterm.DefaultInteractiveTextInput
+		commitMessage.DefaultText = "If applied this commit will.."
+		commitMessageInput, _ := commitMessage.Show()
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// commitCmd.PersistentFlags().String("foo", "", "A help for foo")
+		com := internal.NewCommitMessage(commitTypeSelected, commitMessageInput)
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// commitCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+		pterm.Println()
+
+		breakingChanges := pterm.DefaultInteractiveConfirm
+		breakingChanges.DefaultText = "Does your commit have breaking changes?"
+		breakingChangesConfirmed, _ := breakingChanges.Show()
+		if breakingChangesConfirmed{
+			com.HasBreakingChanges()
+		}
+
+		pterm.Println()
+
+		hasScope := pterm.DefaultInteractiveConfirm
+		hasScope.DefaultText = "Does your commit have a scope of work?"
+		hasScopeConfirmed, _ := hasScope.Show()
+		pterm.Println()
+
+		if hasScopeConfirmed {
+			scopeMessage := pterm.DefaultInteractiveTextInput
+			scopeMessage.DefaultText = "Enter your scope here"
+			scopeMessageInput, _ := scopeMessage.Show()
+
+			pterm.Println()
+			com.AddScope(scopeMessageInput)
+		}
+
+		confirmCommit := pterm.DefaultInteractiveConfirm
+		pterm.DefaultBasicText.Println("your commit message will be " + pterm.Red(com.ToSting()))
+		confirmCommit.DefaultText = "Are you happy with this commit message?" 
+		confirmCommitBool, _ := confirmCommit.Show()
+		if confirmCommitBool{
+			internal.Commit(com)
+		}
+		os.Exit(1)
+	},
 }
